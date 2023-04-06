@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Главная страница";
+}
+<h1>@ViewData["Title"]</h1>
+
+@Html.ActionLink("Создать новый заказ", "Create", "Order", 0, new { @class = "btn btn-outline-danger btn-sm" })
+
+<table class="table table-bordered text-center table-hover table-striped" id="orders">
+    <thead class="table-light">
+    <tr>
+        <th scope="col" hidden="hidden" style="display: none">id</th>
+        <th scope="col">Номер заказа</th>
+        <th scope="col">Дата заказа</th>
+        <th scope="col">Поставщик</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr class="text-center align-middle">
+            <td style="display:none">
+                @Html.DisplayFor(m => p.Id)
+            </td>
+            <td >
+                @Html.DisplayFor(m => p.Number)
+            </td>
+            <td >
+                @Html.DisplayFor(m => p.Date)
+            </td>
+            <td >
+                @Html.DisplayFor(m => p.Provider)
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section Scripts
+{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

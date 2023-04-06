@@ -1,11 +1,15 @@
-﻿using project.Models;
+﻿using System.Linq.Expressions;
 
 namespace project.Data;
 
-public interface IDbRepository
+public interface IDbRepository<T> where T : class
 {
-    bool Add(Order order);
-    bool Update(Order order);
-    bool Delete(Order order);
+    Task<IEnumerable<T>> GetAll();
+    Task<T?> GetById(object id);
+    IEnumerable<T> GetByXWithInclude(Func<T, bool> predicate, 
+        params Expression<Func<T, object>>[] includeProperties);
+    bool Add(T obj);
+    bool Update(T obj);
+    bool Delete(T obj);
     bool Save();
 }

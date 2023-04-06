@@ -1,31 +1,59 @@
-﻿using project.Models;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace project.Data;
 
-public class DbRepository : IDbRepository
+public class DbRepository<T> : IDbRepository<T> where T : class
 {
     private readonly AppDbContext _context;
+    private DbSet<T> _dbSet;
 
     public DbRepository(AppDbContext context)
     {
         _context = context;
+        _dbSet = _context.Set<T>();
+    }
+    
+    public async Task<IEnumerable<T>> GetAll()
+    {
+        return await _dbSet.ToListAsync();
     }
 
-    public bool Add(Order order)
+    public async Task<T?> GetById(object id)
     {
-        _context.Add(order);
+        return await _dbSet.FindAsync(id);
+    }
+    
+    public IEnumerable<T> GetByXWithInclude(Func<T, bool> predicate,
+        params Expression<Func<T, object>>[] includeProperties)
+    {
+        var query = Include(includeProperties);
+        return query.Where(predicate).ToList();
+    }
+    
+    private IQueryable<T> Include(params Expression<Func<T, object>>[] includeProperties)
+    {
+        var query = _dbSet.AsNoTracking();
+        return includeProperties
+            .Aggregate(query, (current, includeProperty) =>
+                current.Include(includeProperty));
+    }
+
+    public bool Add(T obj)
+    {
+        _dbSet.Add(obj);
         return Save();
     }
 
-    public bool Update(Order order)
+    public bool Update(T obj)
     {
-        _context.Update(order);
+        _dbSet.Update(obj);
         return Save();
     }
 
-    public bool Delete(Order order)
+    public bool Delete(T obj)
     {
-        _context.Remove(order);
+        _dbSet.Remove(obj);
         return Save();
     }
 

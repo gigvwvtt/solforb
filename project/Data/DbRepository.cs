@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace project.Data;
@@ -13,7 +14,7 @@ public class DbRepository<T> : IDbRepository<T> where T : class
         _context = context;
         _dbSet = _context.Set<T>();
     }
-    
+
     public async Task<IEnumerable<T>> GetAll()
     {
         return await _dbSet.ToListAsync();
@@ -23,20 +24,30 @@ public class DbRepository<T> : IDbRepository<T> where T : class
     {
         return await _dbSet.FindAsync(id);
     }
-    
+
     public IEnumerable<T> GetByXWithInclude(Func<T, bool> predicate,
         params Expression<Func<T, object>>[] includeProperties)
     {
         var query = Include(includeProperties);
         return query.Where(predicate).ToList();
     }
-    
+
+    public IEnumerable<T> GetAllWithInclude(params Expression<Func<T, object>>[] includeProperties)
+    {
+        return Include(includeProperties).ToList();
+    }
+
     private IQueryable<T> Include(params Expression<Func<T, object>>[] includeProperties)
     {
         var query = _dbSet.AsNoTracking();
         return includeProperties
             .Aggregate(query, (current, includeProperty) =>
                 current.Include(includeProperty));
+    }
+
+    public async Task<IEnumerable<TT>> GetDistinctTs<TT>(Expression<Func<T, TT>> select)
+    {
+        return await _dbSet.Select(select).Distinct().ToListAsync();
     }
 
     public bool Add(T obj)

@@ -1,10 +1,39 @@
-﻿@model IEnumerable<Order>
+﻿@model project.ViewModels.OrdersViewModel
 @{
     ViewData["Title"] = "Главная страница";
 }
 <h1>@ViewData["Title"]</h1>
 
-@Html.ActionLink("Создать новый заказ", "Create", "Order", 0, new { @class = "btn btn-outline-danger btn-sm" })
+<form asp-action="Index" method="get">
+    <div class="">
+        <p>
+            Номер заказа:
+            <select name="selectedNumber" asp-items="@Model.OrdersNumbers">
+                <option value="">не выбрано</option>
+            </select>
+            Поставщик:
+            <select name="selectedProvider" asp-items="@Model.Providers">
+                <option value="">не выбрано</option>
+            </select>
+            Наименование товара:
+            <select name="selectedItem" asp-items="@Model.ItemsNames">
+                <option value="">не выбрано</option>
+            </select>
+            Модель товара:
+            <select name="selectedUnit" asp-items="@Model.Units">
+                <option value="">не выбрано</option>
+            </select>
+        </p>
+        <p>
+            Начальная дата: <input type="date" name="startDate" value=@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")/>
+            Конечная дата: <input type="date" name="endDate" value="@DateTime.Today.ToString("yyyy-MM-dd")"/>
+            <input type="submit" class="btn btn-primary btn-sm" value="Применить"/>
+            <a class="btn btn-outline-secondary btn-sm" asp-controller="Order" asp-action="Index">Сброс</a>
+        </p>
+    </div>
+</form>
+
+@Html.ActionLink("Создать новый заказ", "Create", "Order", 0, new { @class = "btn btn-primary mb-3" })
 
 <table class="table table-bordered text-center table-hover table-striped" id="orders">
     <thead class="table-light">
@@ -16,22 +45,25 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var p in Model)
+    @if (Model.Orders != null)
     {
-        <tr class="text-center align-middle">
-            <td style="display:none">
-                @Html.DisplayFor(m => p.Id)
-            </td>
-            <td >
-                @Html.DisplayFor(m => p.Number)
-            </td>
-            <td >
-                @Html.DisplayFor(m => p.Date)
-            </td>
-            <td >
-                @Html.DisplayFor(m => p.Provider)
-            </td>
-        </tr>
+        @foreach (var p in Model.Orders)
+        {
+            <tr class="text-center align-middle" style="cursor: pointer;" onclick="location.href = '@Url.Action("Details", "Order", new { id = p.Id })'">
+                <td style="display:none">
+                    @Html.DisplayFor(m => p.Id)
+                </td>
+                <td >
+                    @Html.DisplayFor(m => p.Number)
+                </td>
+                <td >
+                    @Html.DisplayFor(m => p.Date)
+                </td>
+                <td >
+                    @Html.DisplayFor(m => p.Provider.Name)
+                </td>
+            </tr>
+        }
     }
     </tbody>
 </table>

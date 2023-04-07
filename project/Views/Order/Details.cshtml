@@ -1,0 +1,70 @@
+﻿@model project.ViewModels.DetailsViewModel
+
+@{
+    ViewBag.Title = $"{Model.Number} - Подробности заказа";
+    Layout = "_Layout";
+}
+
+<h2>Заказ - @Model.Number</h2>
+
+<div class="main-container">
+    <div class="w-50">
+        <form class="mt-3" method="get" asp-action="Edit">
+
+            <div style="display: none" class="form-group">
+                <input type="hidden" id="Id" name="Id" asp-for="Id"/>
+            </div>
+
+            <div class="mb-3 form-group">
+                <label asp-for="Number" class="control-label">Номер заказа</label>
+                @Html.TextBoxFor(m => m.Number, new { @class = "form-control", disabled = "", @readonly = "" })
+            </div>
+
+            <div class="mb-3 align-items-center row form-group">
+                <div class="col"> @Html.LabelFor(m => m.Date, "Дата заказа")</div>
+                <div class="col">
+                    @Html.EditorFor(m => m.Date, new { htmlAttributes = new { @class = "form-control", disabled = "", @readonly = "" } })
+                </div>
+            </div>
+
+            <div class="mb-3 form-group">
+                <label asp-for="Provider" class="control-label">Поставщик</label>
+                @Html.TextBoxFor(m => m.Provider.Name, new { @class = "form-control", disabled = "", @readonly = "" })
+            </div>
+
+            <label class="control-label">Товары</label>
+            <table class="table table-bordered text-center table-hover">
+                <thead>
+                <tr>
+                    <td>Наименование</td>
+                    <td>Модель</td>
+                    <td>Количество</td>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.OrderItems != null)
+                {
+                    foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>@Html.TextBoxFor(m => item.Name, new { @class = "form-control", disabled = "", @readonly = "" })</td>
+                            <td>@Html.TextBoxFor(m => item.Unit, new { @class = "form-control", disabled = "", @readonly = "" })</td>
+                            <td>@Html.TextBoxFor(m => item.Quantity, new { @class = "form-control", disabled = "", @readonly = "" })</td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+            
+            <div class="form-group d-grid">
+                <input class="btn btn-success" type="submit" value="Редактировать"/>
+            </div>
+        </form>
+        <form asp-action="Delete" method="post">
+            <div class="form-group d-grid">
+                <input type="hidden" asp-for="Id"/>
+                <input type="submit" class="btn btn-danger float-end mt-3" value="Удалить"/>
+            </div>
+        </form>
+    </div>
+</div>

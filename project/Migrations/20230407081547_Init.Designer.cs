@@ -11,7 +11,7 @@ using project.Data;
 namespace project.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230406103006_Init")]
+    [Migration("20230407081547_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -33,7 +33,7 @@ namespace project.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int?>("ProviderId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -89,9 +89,7 @@ namespace project.Migrations
                 {
                     b.HasOne("project.Models.Provider", "Provider")
                         .WithMany()
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProviderId");
 
                     b.Navigation("Provider");
                 });

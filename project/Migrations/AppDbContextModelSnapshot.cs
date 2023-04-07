@@ -30,7 +30,7 @@ namespace project.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProviderId")
+                    b.Property<int?>("ProviderId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -86,9 +86,7 @@ namespace project.Migrations
                 {
                     b.HasOne("project.Models.Provider", "Provider")
                         .WithMany()
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProviderId");
 
                     b.Navigation("Provider");
                 });

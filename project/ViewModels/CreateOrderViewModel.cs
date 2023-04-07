@@ -1,20 +1,18 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using project.Models;
 
-namespace project.Models;
+namespace project.ViewModels;
 
-public class Order
+public class CreateOrderViewModel
 {
-    [Key]
     public int Id { get; set; } 
     [DisplayName("Номер заказа")]
     public string Number { get; set; }
     [DisplayName("Дата заказа")]
     [DataType(DataType.Date)] 
     public DateTime Date { get; set; }
-    [ForeignKey("Provider")]
     [DisplayName("Поставщик")]
-    public int? ProviderId { get; set; }
     public Provider? Provider { get; set; }
 }

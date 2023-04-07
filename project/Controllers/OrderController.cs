@@ -82,10 +82,81 @@ public class OrderController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var orders = await _orderRepository.GetAll();
+        var order = _orderRepository.GetByXWithInclude(o=>o.Id == id, p=>p.Provider).ToList()[0];
+        if (order == null)
+        {
+            return View("Error");
+        }
 
-        var providers = await _providerRepository.GetAll();
-        ViewBag.AvailableProviders = new SelectList(providers.Select(p => p.Name).Distinct());
-        return View();
+        var orderItems = _orderItemRepository.GetByXWithInclude(oi => oi.OrderId == id).ToList();
+
+        var detailsViewModel = new DetailsViewModel()
+        {
+            Id = order.Id,
+            Date = order.Date,
+            Number = order.Number,
+            Provider = order.Provider,
+            ProviderId = order.ProviderId,
+            OrderItems = orderItems 
+        };
+        
+        return View(detailsViewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var order = _orderRepository.GetByXWithInclude(o=>o.Id == id, o=>o.Provider).ToList();
+        if (order == null) return View("Error");
+        
+        var providersRaw = await _providerRepository.GetDistinctTs(p => p);
+        var providers = new SelectList(providersRaw,
+            "Id", "Name");
+        
+        var orderItems = _orderItemRepository.GetByXWithInclude(oi => oi.OrderId == id).ToList();
+        
+        var editViewModel = new EditViewModel()
+        {
+            Date = order[0].Date,
+            Number = order[0].Number,
+            Provider = order[0].Provider,
+            Providers = providers,
+            OrderItems = orderItems 
+        };
+        
+        return View(editViewModel);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, EditViewModel editOrderViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            ModelState.AddModelError("", "Ошибка при редактировании");
+            return View("Edit", editOrderViewModel);
+        }
+
+        var order = new Order()
+        {
+            Id = id,
+            Date = editOrderViewModel.Date,
+            Number = editOrderViewModel.Number,
+            Provider = editOrderViewModel.Provider,
+            ProviderId = editOrderViewModel.ProviderId
+        };
+
+        _orderRepository.Update(order);
+        return RedirectToAction("Index");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var order = await _orderRepository.GetById(id);
+        if (order == null) return View("Error");
+
+        _orderRepository.Delete(order);
+        return RedirectToAction("Index");
     }
 }

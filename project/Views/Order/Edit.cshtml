@@ -10,6 +10,7 @@
 <div class="main-container">
     <div class="w-50">
         <form class="mt-3" method="post" asp-action="Edit">
+            @Html.AntiForgeryToken()
 
             <div style="display: none" class="form-group">
                 <input type="hidden" id="Id" name="Id" asp-for="Id"/>

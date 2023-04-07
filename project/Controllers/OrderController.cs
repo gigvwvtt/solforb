@@ -8,9 +8,9 @@ namespace project.Controllers;
 
 public class OrderController : Controller
 {
-    private IDbRepository<Order> _orderRepository;
-    private IDbRepository<Provider> _providerRepository;
-    private IDbRepository<OrderItem> _orderItemRepository;
+    private readonly IDbRepository<Order> _orderRepository;
+    private readonly IDbRepository<Provider> _providerRepository;
+    private readonly IDbRepository<OrderItem> _orderItemRepository;
 
     public OrderController(IDbRepository<Order> orderRepository, IDbRepository<Provider> providerRepository,
         IDbRepository<OrderItem> orderItemRepository)
@@ -21,9 +21,10 @@ public class OrderController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, string? selectedNumber, int? selectedProvider)
+    public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, string? selectedNumber,
+        int? selectedProvider)
     {
-        var orders = _orderRepository.GetAllWithInclude(o=>o.Provider);
+        var orders = _orderRepository.GetAllWithInclude(o => o.Provider);
 
         var ordersNumbersRaw = await _orderRepository.GetDistinctTs(p => new { p.Number });
         var ordersNumbers = new SelectList(ordersNumbersRaw.Select(o => o.Number));
@@ -34,10 +35,8 @@ public class OrderController : Controller
         var itemsUnitsRaw = await _orderItemRepository.GetDistinctTs(p => new { p.Unit });
         var itemsUnits = new SelectList(itemsUnitsRaw.Select(o => o.Unit));
 
-        var providersRaw = await _providerRepository.GetDistinctTs(p => p);
-        var providers = new SelectList(providersRaw, "Id", "Name");
+        var providers = await GetAvailableProviders();
 
-        
 
         //filters
         if (startDate != null && endDate != null)
@@ -57,32 +56,66 @@ public class OrderController : Controller
 
         var ordersViewModel = new OrdersViewModel
         {
-           Orders = orders,
-           OrdersNumbers = ordersNumbers,
-           ItemsNames = itemsNames,
-           Units = itemsUnits,
-           Providers = providers
+            Orders = orders,
+            OrdersNumbers = ordersNumbers,
+            ItemsNames = itemsNames,
+            Units = itemsUnits,
+            Providers = providers
         };
-        
+
         return View(ordersViewModel);
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View();
+        var providers = await GetAvailableProviders();
+
+        var createOrderViewModel = new CreateOrderViewModel()
+        {
+            Providers = providers
+        };
+
+        return View(createOrderViewModel);
     }
 
     [HttpPost]
-    public IActionResult Create(Order order)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CreateOrderViewModel createOrderViewModel)
     {
-        return View("Index");
+        if (!ModelState.IsValid)
+        {
+            ModelState.AddModelError("", "Ошибка при создании заказа");
+            createOrderViewModel.Providers = await GetAvailableProviders();
+            return View(createOrderViewModel);
+        }
+
+        var checkOrder = _orderRepository.GetWithFilter(o => o.Number == createOrderViewModel.Number,
+                o => o.ProviderId == createOrderViewModel.ProviderId)
+                .Any();
+
+        if (checkOrder)
+        {
+            ModelState.AddModelError("", "Наименование товара не может быть таким же как номер заказа");
+            createOrderViewModel.Providers = await GetAvailableProviders();
+            return View(createOrderViewModel);
+        }
+
+        var newOrder = new Order()
+        {
+            Date = createOrderViewModel.Date,
+            Number = createOrderViewModel.Number,
+            ProviderId = createOrderViewModel.ProviderId
+        };
+
+        _orderRepository.Add(newOrder);
+        return RedirectToAction("Index");
     }
 
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var order = _orderRepository.GetByXWithInclude(o=>o.Id == id, p=>p.Provider).ToList()[0];
+        var order = _orderRepository.GetByXWithInclude(o => o.Id == id, p => p.Provider).ToList()[0];
         if (order == null)
         {
             return View("Error");
@@ -97,33 +130,31 @@ public class OrderController : Controller
             Number = order.Number,
             Provider = order.Provider,
             ProviderId = order.ProviderId,
-            OrderItems = orderItems 
+            OrderItems = orderItems
         };
-        
+
         return View(detailsViewModel);
     }
 
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var order = _orderRepository.GetByXWithInclude(o=>o.Id == id, o=>o.Provider).ToList();
+        var order = _orderRepository.GetByXWithInclude(o => o.Id == id, o => o.Provider).ToList();
         if (order == null) return View("Error");
-        
-        var providersRaw = await _providerRepository.GetDistinctTs(p => p);
-        var providers = new SelectList(providersRaw,
-            "Id", "Name");
-        
+
+        var providers = await GetAvailableProviders();
+
         var orderItems = _orderItemRepository.GetByXWithInclude(oi => oi.OrderId == id).ToList();
-        
+
         var editViewModel = new EditViewModel()
         {
             Date = order[0].Date,
             Number = order[0].Number,
             Provider = order[0].Provider,
             Providers = providers,
-            OrderItems = orderItems 
+            OrderItems = orderItems
         };
-        
+
         return View(editViewModel);
     }
 
@@ -133,8 +164,9 @@ public class OrderController : Controller
     {
         if (!ModelState.IsValid)
         {
-            ModelState.AddModelError("", "Ошибка при редактировании");
-            return View("Edit", editOrderViewModel);
+            ModelState.AddModelError("", "Ошибка при редактировании заказа");
+            editOrderViewModel.Providers = await GetAvailableProviders();
+            return View(editOrderViewModel);
         }
 
         var order = new Order()
@@ -158,5 +190,11 @@ public class OrderController : Controller
 
         _orderRepository.Delete(order);
         return RedirectToAction("Index");
+    }
+
+    private async Task<SelectList> GetAvailableProviders()
+    {
+        var providersRaw = await _providerRepository.GetDistinctTs(p => p);
+        return new SelectList(providersRaw, "Id", "Name");
     }
 }

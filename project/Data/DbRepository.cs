@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace project.Data;
@@ -23,6 +22,12 @@ public class DbRepository<T> : IDbRepository<T> where T : class
     public async Task<T?> GetById(object id)
     {
         return await _dbSet.FindAsync(id);
+    }
+
+    public IEnumerable<T> GetWithFilter(params Func<T, bool>[] predicate)
+    {
+        var query = _dbSet.AsNoTracking().AsEnumerable();
+        return predicate.Aggregate(query, (current, f) => current.Where(f));
     }
 
     public IEnumerable<T> GetByXWithInclude(Func<T, bool> predicate,

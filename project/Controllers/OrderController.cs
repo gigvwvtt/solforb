@@ -22,7 +22,7 @@ public class OrderController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, string? selectedNumber,
-        int? selectedProvider)
+        int? selectedProvider, string? selectedItemName, string? selectedItemUnit)
     {
         var orders = _orderRepository.GetAllWithInclude(o => o.Provider);
 
@@ -52,6 +52,22 @@ public class OrderController : Controller
         if (selectedProvider != null)
         {
             orders = orders.Where(o => o.ProviderId == selectedProvider);
+        }
+        
+        if (selectedItemName != null)
+        {
+            var items = _orderItemRepository.GetWithFilter(oi => oi.Name == selectedItemName)
+                .Select(oi=>oi.OrderId)
+                .ToList();
+            orders = orders.IntersectBy(items, o=>o.Id);
+        }
+        
+        if (selectedItemUnit != null)
+        {
+            var items = _orderItemRepository.GetWithFilter(oi => oi.Unit == selectedItemUnit)
+                .Select(oi=>oi.OrderId)
+                .ToList();
+            orders = orders.IntersectBy(items, o=>o.Id);
         }
 
         var ordersViewModel = new OrdersViewModel
@@ -115,13 +131,13 @@ public class OrderController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var order = _orderRepository.GetByXWithInclude(o => o.Id == id, p => p.Provider).ToList()[0];
+        var order = _orderRepository.GetWithFilterWithInclude(o => o.Id == id, p => p.Provider).ToList()[0];
         if (order == null)
         {
             return View("Error");
         }
 
-        var orderItems = _orderItemRepository.GetByXWithInclude(oi => oi.OrderId == id).ToList();
+        var orderItems = _orderItemRepository.GetWithFilterWithInclude(oi => oi.OrderId == id).ToList();
 
         var detailsViewModel = new DetailsViewModel()
         {
@@ -139,15 +155,16 @@ public class OrderController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var order = _orderRepository.GetByXWithInclude(o => o.Id == id, o => o.Provider).ToList();
+        var order = _orderRepository.GetWithFilterWithInclude(o => o.Id == id, o => o.Provider).ToList();
         if (order == null) return View("Error");
 
         var providers = await GetAvailableProviders();
 
-        var orderItems = _orderItemRepository.GetByXWithInclude(oi => oi.OrderId == id).ToList();
+        var orderItems = _orderItemRepository.GetWithFilterWithInclude(oi => oi.OrderId == id).ToList();
 
-        var editViewModel = new EditViewModel()
+        var editViewModel = new EditOrderViewModel()
         {
+            Id = id,
             Date = order[0].Date,
             Number = order[0].Number,
             Provider = order[0].Provider,
@@ -160,7 +177,7 @@ public class OrderController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, EditViewModel editOrderViewModel)
+    public async Task<IActionResult> Edit(int id, EditOrderViewModel editOrderViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -169,15 +186,18 @@ public class OrderController : Controller
             return View(editOrderViewModel);
         }
 
+        var orderInDb = _orderRepository.GetWithFilter(o=>o.Id == id).ToList();
+        if (orderInDb == null) return View("Error");
+
         var order = new Order()
         {
-            Id = id,
+            Id = orderInDb[0].Id,
             Date = editOrderViewModel.Date,
             Number = editOrderViewModel.Number,
             Provider = editOrderViewModel.Provider,
             ProviderId = editOrderViewModel.ProviderId
         };
-
+        
         _orderRepository.Update(order);
         return RedirectToAction("Index");
     }

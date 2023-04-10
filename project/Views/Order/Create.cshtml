@@ -16,7 +16,7 @@
             </div>
 
             <div class="mb-3 form-group">
-                <label asp-for="Number" class="control-label">Номер заказа</label>
+                @Html.LabelFor(m => m.Number, "Номер заказа")
                 @Html.TextBoxFor(m => m.Number, new { @class = "form-control" })
                 @Html.ValidationMessageFor(m => m.Number, "", new { @class = "text-danger" })
             </div>
@@ -30,7 +30,7 @@
             </div>
 
             <div class="mb-3 form-group">
-                <label class="control-label">Поставщик</label>
+                @Html.LabelFor(m => m.ProviderId, "Номер заказа")
                 <select asp-for="@Model.ProviderId" class="form-select" asp-items="Model.Providers">
                 </select>
                 @Html.ValidationMessageFor(m => m.ProviderId, "", new { @class = "text-danger" })
@@ -43,6 +43,7 @@
                     <td>Наименование</td>
                     <td>Модель</td>
                     <td>Количество</td>
+                    <td></td>
                 </tr>
                 </thead>
                 <tbody>
@@ -64,7 +65,10 @@
                                 @Html.ValidationMessageFor(m => item.Quantity, "", new { @class = "text-danger" })
                             </td>
                             <td>
-                                <button type="button" class="btn btn-light" onclick="location.href='@Url.Action("Delete", "OrderItem", new { id = item.Id })'">X</button>
+                                <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Edit" asp-route-id="@item.Id">Ред.</a>
+                            </td>
+                            <td>
+                                <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Delete" asp-route-id="@item.Id">X</a>
                             </td>
                         </tr>
                     }

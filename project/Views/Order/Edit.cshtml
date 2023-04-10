@@ -1,4 +1,4 @@
-﻿@model project.ViewModels.EditViewModel
+﻿@model project.ViewModels.EditOrderViewModel
 
 @{
     ViewBag.Title = $"Редактирование заказа - {Model.Number}";
@@ -17,7 +17,7 @@
             </div>
 
             <div class="mb-3 form-group">
-                <label asp-for="Number" class="control-label">Номер заказа</label>
+                @Html.LabelFor(m => m.Number, "Номер заказа")
                 @Html.TextBoxFor(m => m.Number, "", new { @class = "form-control" })
                 @Html.ValidationMessageFor(m => m.Number, "", new { @class = "text-danger" })
             </div>
@@ -31,9 +31,9 @@
             </div>
 
             <div class="mb-3 form-group">
-                <label asp-for="Provider" class="control-label">Поставщик</label>
+                @Html.LabelFor(m => m.Provider, "Поставщик")
                 <select asp-for="@Model.ProviderId" class="form-select" asp-items="Model.Providers">
-                    <option selected="" disabled="" value="@Model.Provider.Id" text>@Model.Provider.Name</option>
+                    <option selected="" value="@Model.Provider.Id" text>@Model.Provider.Name</option>
                 </select>
             </div>
 
@@ -44,6 +44,8 @@
                     <td>Наименование</td>
                     <td>Модель</td>
                     <td>Количество</td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 </thead>
                 <tbody>
@@ -61,11 +63,14 @@
                                 @Html.ValidationMessageFor(m => item.Unit, "", new { @class = "text-danger" })
                             </td>
                             <td>
-                                @Html.TextBoxFor(m => item.Quantity, new { @class = "form-control" })
+                                @Html.TextBoxFor(m => item.Quantity, new { @class = "form-control", disabled = "", @readonly = "" })
                                 @Html.ValidationMessageFor(m => item.Quantity, "", new { @class = "text-danger" })
                             </td>
                             <td>
-                                <button type="button" class="btn btn-light" onclick="location.href='@Url.Action("Delete", "OrderItem", new { id = item.Id })'">X</button>
+                                <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Edit" asp-route-id="@item.Id">Ред.</a>
+                            </td>
+                            <td>
+                                <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Delete" asp-route-id="@item.Id">X</a>
                             </td>
                         </tr>
                     }

@@ -1,0 +1,48 @@
+﻿@model project.ViewModels.EditOrderItemViewModel
+
+@{
+    ViewBag.Title = "Редактирование элемента Заказа";
+    Layout = "_Layout";
+}
+<h2>Элемент заказа - @Model.Name</h2>
+
+<div class="main-container">
+    <h1>@ViewData["Title"]</h1>
+    <div class="w-50">
+        <form class="mt-3" method="post" asp-action="Edit">
+            @Html.AntiForgeryToken()
+
+            <div style="display: none" class="form-group">
+                <input type="hidden" id="OrderId" name="OrderId" asp-for="OrderId"/>
+            </div>
+
+            <div class="mb-3 form-group">
+                @Html.LabelFor(m=>m.Name, "Наименование товара")
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3 align-items-center form-group">
+                 @Html.LabelFor(m => m.Quantity, "Количество")
+                 @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control" })
+                 @Html.ValidationMessageFor(m => m.Quantity, "", new { @class = "text-danger" })
+            </div>
+            
+        <div class="mb-3 align-items-center form-group">
+            @Html.LabelFor(m => m.Unit, "Модель")
+            @Html.TextBoxFor(m => m.Unit, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Unit, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group d-grid gap-2">
+                <input class="btn btn-success" type="submit" value="Сохранить"/>
+                <a class="btn btn-danger" type="button" asp-controller="Order" asp-action="Index">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

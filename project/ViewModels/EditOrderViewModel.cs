@@ -3,7 +3,7 @@ using project.Models;
 
 namespace project.ViewModels;
 
-public class EditViewModel
+public class EditOrderViewModel
 {
     public int Id { get; set; }
     public string Number { get; set; }

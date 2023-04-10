@@ -16,7 +16,7 @@
             </div>
 
             <div class="mb-3 form-group">
-                <label asp-for="Number" class="control-label">Номер заказа</label>
+                @Html.LabelFor(m=>m.Number, "Номер заказа")
                 @Html.TextBoxFor(m => m.Number, new { @class = "form-control", disabled = "", @readonly = "" })
             </div>
 
@@ -28,7 +28,7 @@
             </div>
 
             <div class="mb-3 form-group">
-                <label asp-for="Provider" class="control-label">Поставщик</label>
+                @Html.LabelFor(m=>m.Provider, "Поставщик")
                 @Html.TextBoxFor(m => m.Provider.Name, new { @class = "form-control", disabled = "", @readonly = "" })
             </div>
 

@@ -30,7 +30,7 @@ public class DbRepository<T> : IDbRepository<T> where T : class
         return predicate.Aggregate(query, (current, f) => current.Where(f));
     }
 
-    public IEnumerable<T> GetByXWithInclude(Func<T, bool> predicate,
+    public IEnumerable<T> GetWithFilterWithInclude(Func<T, bool> predicate,
         params Expression<Func<T, object>>[] includeProperties)
     {
         var query = Include(includeProperties);

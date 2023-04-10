@@ -35,49 +35,50 @@
                 </select>
                 @Html.ValidationMessageFor(m => m.ProviderId, "", new { @class = "text-danger" })
             </div>
-
-            <label class="control-label">Товары</label>
-            <table class="table table-bordered text-center table-hover">
-                <thead>
-                <tr>
-                    <td>Наименование</td>
-                    <td>Модель</td>
-                    <td>Количество</td>
-                    <td></td>
-                </tr>
-                </thead>
-                <tbody>
-                @if (Model.OrderItems != null)
-                {
-                    foreach (var item in Model.OrderItems)
-                    {
-                        <tr>
-                            <td>
-                                @Html.TextBoxFor(m => item.Name, new { @class = "form-control", disabled = "", @readonly = "" })
-                                @Html.ValidationMessageFor(m => item.Name, "", new { @class = "text-danger" })
-                            </td>
-                            <td>
-                                @Html.TextBoxFor(m => item.Unit, new { @class = "form-control", disabled = "", @readonly = "" })
-                                @Html.ValidationMessageFor(m => item.Unit, "", new { @class = "text-danger" })
-                            </td>
-                            <td>
-                                @Html.TextBoxFor(m => item.Quantity, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => item.Quantity, "", new { @class = "text-danger" })
-                            </td>
-                            <td>
-                                <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Edit" asp-route-id="@item.Id">Ред.</a>
-                            </td>
-                            <td>
-                                <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Delete" asp-route-id="@item.Id">X</a>
-                            </td>
-                        </tr>
-                    }
-                }
-                </tbody>
-            </table>
-            <div class="mb-3">
-                <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Create", "OrderItem", new { orderId = Model.Id })'">Добавить товар</button>
-            </div>
+            <label class="mb-3">Товары добавляются после создания заказа.</label>
+            @* <label class="control-label">Товары</label> *@
+            @* <table class="table table-bordered text-center table-hover"> *@
+            @*     <thead> *@
+            @*     <tr> *@
+            @*         <td>Наименование</td> *@
+            @*         <td>Модель</td> *@
+            @*         <td>Количество</td> *@
+            @*         <td></td> *@
+            @*     </tr> *@
+            @*     </thead> *@
+            @*     <tbody> *@
+            @*     @if (Model.OrderItems != null) *@
+            @*     { *@
+            @*         foreach (var item in Model.OrderItems) *@
+            @*         { *@
+            @*             <tr> *@
+            @*                 <td> *@
+            @*                     @Html.TextBoxFor(m => item.Name, new { @class = "form-control", disabled = "", @readonly = "" }) *@
+            @*                     @Html.ValidationMessageFor(m => item.Name, "", new { @class = "text-danger" }) *@
+            @*                 </td> *@
+            @*                 <td> *@
+            @*                     @Html.TextBoxFor(m => item.Unit, new { @class = "form-control", disabled = "", @readonly = "" }) *@
+            @*                     @Html.ValidationMessageFor(m => item.Unit, "", new { @class = "text-danger" }) *@
+            @*                 </td> *@
+            @*                 <td> *@
+            @*                     @Html.TextBoxFor(m => item.Quantity, new { @class = "form-control" }) *@
+            @*                     @Html.ValidationMessageFor(m => item.Quantity, "", new { @class = "text-danger" }) *@
+            @*                 </td> *@
+            @*                 <td> *@
+            @*                     <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Edit" asp-route-id="@item.Id">Ред.</a> *@
+            @*                 </td> *@
+            @*                 <td> *@
+            @*                     <a type="button" class="btn btn-light" asp-controller="OrderItem" asp-action="Delete" asp-route-id="@item.Id">X</a> *@
+            @*                 </td> *@
+            @*             </tr> *@
+            @*         } *@
+            @*     } *@
+            @*     </tbody> *@
+            @* </table> *@
+            @* нельзя добавить к несуществующему order по id *@
+            @* <div class="mb-3"> *@
+            @*     <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Create", "OrderItem", new { orderId = Model.Id })'">Добавить товар</button> *@
+            @* </div> *@
 
             <div class="form-group d-grid gap-2">
                 <input class="btn btn-success" type="submit" value="Сохранить"/>

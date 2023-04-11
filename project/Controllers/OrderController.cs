@@ -139,7 +139,7 @@ public class OrderController : Controller
 
         var orderItems = _orderItemRepository.GetWithFilterWithInclude(oi => oi.OrderId == id).ToList();
 
-        var detailsViewModel = new DetailsViewModel()
+        var detailsViewModel = new OrderDetailsViewModel()
         {
             Id = order.Id,
             Date = order.Date,
